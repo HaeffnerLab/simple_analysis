@@ -12,6 +12,10 @@ ReadData - Load a specific dataset
 import numpy as np
 import pylab as pl
 import os
+try:
+    from treedict import TreeDict
+except ImportError:
+    TreeDict = dict
 
 def getbasepath():
     try:
@@ -139,19 +143,21 @@ def get_parameters(time, time_dict):
     dirname = time_dict[time]
     dirlist = os.listdir(dirname)
     dirlist.remove("session.ini")
+    param_dict = TreeDict()
     for fname in dirlist:
         if os.path.splitext(fname)[1] == '.ini':
                 Config.read(dirname +'/'+fname)
-        param_dict ={}
         for sect in Config.sections():
             option_list = Config.options(sect)
             if 'Parameter' in sect:
                 dstr = 'data = '+Config.get(sect,'data')
                 exec(dstr)
-                param_dict[Config.get(sect,'label')] = data
-            param_dict['Scanned Value'] = Config.get('Independent 1','label') 
+                mykey = Config.get(sect,'label')
+                mykey = mykey.replace('-','_')
+                param_dict[mykey] = data
+            param_dict['Scanned_Value'] = Config.get('Independent 1','label') 
             param_dict['Title'] = Config.get('General','title') 
-        return param_dict
+    return param_dict
 
 class ReadData():
     def __init__(self, date, time_str=None, experiment=None,  basepath = BASEPATH, 

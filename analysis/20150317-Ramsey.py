@@ -1,41 +1,43 @@
 from simple_analysis import get_data as gd
-from cct.scripts.experiments.Camera.ion_state_detector_1d import ion_state_detector
+from simple_analysis import cam_postanalyze as post
+import seaborn as sns
 import numpy as np
+import pylab as pl
+from scipy import optimize
+
+def squared_loss(params, y):
+    C, phi, b = params
+    x = np.array([0., 90., 180., 270.])
+    e = y*(1-y)/np.sqrt(100.)
+    dy = y - ((C/2)*(1 + np.sin(np.pi*x/180. + phi)) + b)
+    return np.sum(0.5 * (dy / e) ** 2)
 
 md = gd.MeasDay('2015Mar17')
 rd = gd.ReadData('2015Mar17', experiment='RamseyScanGapContrast')
 
-timestr = '2028_20'
-params = md.param_dict[timestr]
-ion_params = params.IonsOnCamera
-ion_params['ion_positions'] = ion_params['ion_positions'][1]
-ion_params.vertical_max = ion_params.vertical_min
-positions = ion_params['ion_positions']
+timestr_list = ['2028_20','2109_33','2137_27','2211_32']
+c_dict = {}
+for timestr in timestr_list:
+    statelist = post.get_statelist(timestr, md, rd)
 
+    statelist = np.array(statelist)
+    plist = statelist.reshape([statelist.shape[0]/4,4])
 
-image_region = [int(ion_params.horizontal_bin),
-                int(ion_params.vertical_bin),
-                int(ion_params.horizontal_min),
-                int(ion_params.horizontal_max),
-                int(ion_params.vertical_min),
-                int(ion_params.vertical_max)]
+    clist = []
 
-x_axis = np.arange(ion_params.horizontal_min, ion_params.horizontal_max + 1, image_region[0])
-y_axis = np.arange(ion_params.vertical_min, ion_params.vertical_max + 1, image_region[1])
-xx, yy = np.meshgrid(x_axis, y_axis)
+    for i in range(plist.shape[0]):
+        p = plist[i,:]
+        c, phase_shift, b = optimize.fmin(squared_loss, [0,0,0], args=tuple([p]) )
+        clist.append(np.abs(c))
+    c_dict[timestr] = clist
+    pl.figure()
+    for i in range(4):
+        pl.plot(plist[:,i])
 
-fh = open('images.npy')
-n_imag = 0
-imag_list = []
-try:
-    while(True):
-        a = np.load(fh)
-        imag_list.append(a)
-except:
-    pass
-pos = []
-for image in imag_list:
-    image = image[0,:,:]
-    fitter = ion_state_detector(positions)
-    result, params = fitter.guess_parameters_and_fit(xx, yy, image)
-    pos.append(params['pos0'].value)
+pl.figure()
+for i, timestr in enumerate(timestr_list):
+    clist = c_dict[timestr]
+    pl.subplot(4,1,i)
+    pl.plot(clist, label=timestr)
+    pl.legend()
+pl.show()

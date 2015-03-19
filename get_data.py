@@ -206,3 +206,25 @@ class ReadData():
             self.data = a
             return a
 
+
+
+    def get_images(self, time_str, experiment=None, basepath=BASEPATH, direct_path=None):
+        if experiment == None:
+            experiment = self.experiment
+        if direct_path == None:
+            pathname = self.basepath+ '/' + experiment + ".dir/" + self.date + '.dir/' + time_str + '.dir/'
+        else:
+            pathname = direct_path + '/'
+
+        fh = open(pathname + 'images.npy')
+        data_list = []
+        n_im = 0
+        try:
+            while(True):
+                im = np.load(fh)
+                data_list.append(im)
+                n_im += 1
+        except IOError:
+            print "Loaded " + str(n_im) + " images"
+        return data_list
+

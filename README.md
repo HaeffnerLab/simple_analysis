@@ -21,7 +21,7 @@ It is also convenient to add simple analysis to your PYTHONPATH
 export PYTHONPATH="/path-to-simpleanalysis/"
 ```
 
-# Usage:
+# Basic Usage:
 
 
 ```python
@@ -42,6 +42,11 @@ Load a single file:
 
 >>>> time_str = '2107_26'
 >>>> md.read_file(time_str)
+
+Plot a dataset
+
+>>>> md.plot_file(time_str)
+
 
 Have a look at the saved parameters
 

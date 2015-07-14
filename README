@@ -3,8 +3,8 @@ simple analysis - A package to read and analyze data saved by LabRad
 This is mainly meant to navigate in the forest of directories where LabRad saves the data
 
 
-Installation:
-=============
+# Installation:
+
 
 Required packages: treedict, pylab, numpy
 
@@ -21,8 +21,8 @@ It is also convenient to add simple analysis to your PYTHONPATH
 export PYTHONPATH="/path-to-simpleanalysis/"
 ```
 
-Usage:
-======
+# Usage:
+
 
 ```python
 

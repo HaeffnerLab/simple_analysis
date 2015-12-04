@@ -76,9 +76,9 @@ class MeasDay():
                 except:
                     pass
 
-    def read_file(self, time_str):
+    def read_file(self, time_str, get_errors = True):
         this_path = self.file_dict[time_str]
-        rd = ReadData(self.date, time_str=time_str, direct_path=this_path)
+        rd = ReadData(self.date, time_str=time_str, direct_path=this_path, get_errors = get_errors)
         return rd.data
 
     def plot_file(self,time_str,fmt=None):
@@ -184,7 +184,9 @@ class ReadData():
         fl = os.listdir(pathname)
         fl.sort()
         for files in fl:
-            if files.endswith("csv"):
+            if files.endswith("rdout.csv"):
+                pass
+            elif files.endswith("csv"):
                 print files
                 if self.data == None:
                     self.data = np.loadtxt(pathname + files,delimiter=',')
